@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Project {
+  id              String              @id @default(cuid())
+  title           String
+  slug            String              @unique
+  description     String
+  githubUrl       String?
+  liveUrl         String?
+  imageUrl        String?
+  featured        Boolean             @default(false)
+  visible         Boolean             @default(true)
+  stars           Int                 @default(0)
+  forks           Int                 @default(0)
+  language        String?
+  githubId        Int?                @unique
+  githubUpdatedAt DateTime?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  technologies    ProjectTechnology[]
+}
+
+model Technology {
+  id       String              @id @default(cuid())
+  name     String              @unique
+  color    String?
+  projects ProjectTechnology[]
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, technologyId])
+}
+
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model GitHubSync {
+  id               String   @id @default(cuid())
+  username         String
+  syncedAt         DateTime @default(now())
+  repoCount        Int      @default(0)
+  contributionData Json?
+}
